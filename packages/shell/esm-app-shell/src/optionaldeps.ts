@@ -56,7 +56,11 @@ function setupOptionalDependencies() {
         (response.data.results ?? []).forEach((backendModule) => {
           if (optionalDependencyFlags.has(backendModule.uuid)) {
             const optionalDependency = optionalDependencyFlags.get(backendModule.uuid);
-            if (optionalDependency && satisfies(backendModule.version, optionalDependency.version)) {
+            let backendModuleVersion = backendModule.version;
+            if (process.env.NODE_ENV === 'DEVELOPMENT' && backendModuleVersion.endsWith('-SNAPSHOT')) {
+              backendModuleVersion = backendModuleVersion.replace('-SNAPSHOT', '');
+            }
+            if (optionalDependency && satisfies(backendModuleVersion, optionalDependency.version)) {
               registerFeatureFlag(
                 optionalDependency.feature.flagName,
                 optionalDependency.feature.label,
